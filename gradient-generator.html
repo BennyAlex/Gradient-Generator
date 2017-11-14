@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gradient Generator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body, html {
+      height: 100%;
+      width: 100%;
+    }
+
+    .container {
+      height: 100%;
+      text-align: center;
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: column;
+      align-content: center;
+      align-items: center;
+      justify-content: space-around;
+    }
+
+    .container>div {
+      flex: 0 1 auto;
+      text-align: center;
+    }
+
+    h1, button, label {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      -webkit-touch-callout: none;
+      tap-highlight-color: transparent;
+      user-select: none;
+      outline-style: none;
+      -webkit-user-drag: none;
+      user-drag: none;
+    }
+
+    h1 {
+      font-size: 54px;
+      text-align: center;
+      letter-spacing: 9px;
+      -webkit-text-stroke: 1px white;
+      background-image: -webkit-gradient(linear, left top, right top, color-stop(0, #f22), color-stop(0.15, #f2f), color-stop(0.3, #22f), color-stop(0.45, #2ff), color-stop(0.6, #2f2), color-stop(0.75, #2f2), color-stop(0.9, #ff2), color-stop(1, #f22));
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      text-transform: uppercase;
+    }
+
+    button {
+      border: 1px solid rgba(0, 0, 0, 0.8);
+      padding: 16px 22px;
+      background: rgba(255, 255, 255, 0.7);
+      -border-radius: 28px;
+      color: rgba(0, 0, 0, 0.9);
+      cursor: pointer;
+      font-size: 22px;
+      text-transform: uppercase;
+    }
+
+    #gradient {
+      padding: 14px 18px;
+      text-align: center;
+      font-size: 20px;
+      font-family: 'Consolas', 'Deja Vu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 12px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    #settings {
+      margin-bottom: 4px;
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.65);
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .check {
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+
+    #settings:first-child input
+  </style>
+</head>
+<body>
+<div class="container">
+  <div><h1>Gradient Generator</h1></div>
+
+  <div><span id="gradient">orange</span></div>
+
+  <div>
+    <div id="settings">
+      <div class="check">
+        <label for="no-white">No very bright colors</label>
+        <input title="No very bright colors" type="checkbox" id="no-white">
+      </div>
+
+      <div class="check">
+        <label for="no-black">No very dark colors</label>
+        <input title="No very dark colors" type="checkbox" id="no-black">
+      </div>
+
+      <div class="check">
+        <label for="no-same">No same or very similar colors</label>
+        <input title="No same or very similar colors" type="checkbox" id="no-same"
+               onclick="setSettings('noSame', this.checked)">
+      </div>
+
+      <div class="check">
+        <label for="custom-angle">Fixed gradient angle</label>
+        <input title="" type="checkbox" id="custom-angle" onclick="changeAngleBox()">
+      </div>
+
+      <div class="check" style="display: none" id="angle-box">
+        <label for="angle">Gradient angle:</label>
+        <input type="number" min="0" max="360" onchange="setSettings('angle', this.value)" step="1" id="angle">
+      </div>
+    </div>
+    <button onclick="generateGradient()">generate random gradient</button>
+  </div>
+</div>
+
+<script>
+  var gradient = document.getElementById('gradient')
+  var body = document.getElementsByTagName('body')[0]
+  var anglebox = document.getElementById('angle-box')
+  var angle = document.getElementById('angle')
+
+  var settings = {
+    noSame: false,
+    noDark: false,
+    noBright: false,
+    angle: null
+  }
+
+  function changeAngleBox () {
+    if (anglebox.style.display === 'block') {
+      anglebox.style.display = 'none'
+      settings.angle = null
+    }
+    else {
+      anglebox.style.display = 'block'
+      settings.angle = 90
+      angle.value = 90
+    }
+  }
+
+  function setSettings (attr, val) {
+    settings[attr] = val
+  }
+
+  function generateColor () {
+    return '000000'.replace(/0/g, () => {
+      return (~~(Math.random() * 16)).toString(16)
+    })
+  }
+
+  function generateValidColor () {
+    let color = generateColor()
+    if (settings.noBright && settings.noDark) {
+      while (baseOfColor(color) === 'white' || baseOfColor(color) === 'dark') {
+        color = generateColor()
+      }
+    }
+    else if (settings.noBright) {
+      while (baseOfColor(color) === 'white') {
+        color = generateColor()
+      }
+    }
+    else if (settings.noDark) {
+      while (baseOfColor(color) === 'black') {
+        color = generateColor()
+      }
+    }
+    return color
+  }
+
+  function baseOfColor (color) {
+    const r = parseInt(color.substr(0, 2), 16)
+    const g = parseInt(color.substr(2, 2), 16)
+    const b = parseInt(color.substr(4, 2), 16)
+    return r > 215 && g > 215 && b > 215 ? 'white' : r < 45 && g < 45 && b < 45 ? 'black' : r > g && r > b ? 'red' : g > b && g > r ? 'green' : 'blue'
+  }
+
+  function generateGradient () {
+    let color1 = generateValidColor()
+    let color2 = generateValidColor()
+
+    if (settings.noSame) {
+      while (baseOfColor(color1) === baseOfColor(color2)) {
+        color2 = generateValidColor()
+      }
+    }
+    const angle = settings.angle || Math.round(Math.random() * 180)
+    gradient.innerHTML = `linear-gradient(${angle}deg, #${color1}, #${color2})`
+    body.style.background = `linear-gradient(${angle}deg, #${color1}, #${color2})`
+  }
+
+  window.onload = function () {
+    generateGradient()
+  }
+</script>
+</body>
+</html>
